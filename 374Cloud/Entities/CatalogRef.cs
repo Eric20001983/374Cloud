@@ -15,5 +15,7 @@ namespace _374Cloud.Entities
 
         [Required(ErrorMessage = "You should input a category value.")]
         public string Cat { get; set; }
+
+        public int? LayerLevel { get; set; }
     }
 }

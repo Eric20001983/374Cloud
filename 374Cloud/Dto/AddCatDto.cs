@@ -12,5 +12,6 @@ namespace _374Cloud.Dto
         public int id { get; set; }
         public int parent_id { get; set; } = 0;
         public string cat { get; set; }
+        public int layer_level { get; set; }
     }
 }

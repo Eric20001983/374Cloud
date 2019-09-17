@@ -237,7 +237,6 @@ console.log(onodes);
             });
     }
 
-
         //delete node
         function beforeRemove(treeId, treeNode) {
         var data = {
@@ -288,7 +287,7 @@ console.log(onodes);
         var zNodes;
         function searchUnitTree() {
 			$.ajax({
-			url : 'https://localhost:44399/api/catalogList',
+			url : 'https://localhost:44399/api/cat',
 			async :false ,
 			dataType : 'json',
                 success: function (response) {
@@ -314,11 +313,12 @@ console.log(onodes);
 
 <BODY onload="">
     <h1>Edit Catalog</h1>
-
+    <div>
         Add Root Node:
         <input name="rootnode" id="rootnode" type=text>
         <button class="btn btn-primary" type="button" onclick="addRoot();">Add</button>
-
-    <ul id="treeDemo" class="ztree"></ul>
+    </div>
+    <div id="treeDemo" class="ztree" style="display:inline-block; float:left;"></div>
+    <div id="itemList" style="display:inline-block; float:right;">56456456</div>
 </BODY>
 </HTML>

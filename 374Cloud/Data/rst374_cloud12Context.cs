@@ -45,6 +45,8 @@ namespace _374Cloud.Data
                 entity.Property(e => e.ParentId).HasColumnName("parent_id");
 
                 entity.Property(e => e.Seq).HasColumnName("seq");
+
+                entity.Property(e => e.LayerLevel).HasColumnName("layer_level");
             });
 
             modelBuilder.Entity<CodeRelations>(entity =>

@@ -17,9 +17,25 @@ namespace _374Cloud.Controllers
     {
         private rst374_cloud12Context _context = new rst374_cloud12Context();
 
+        int loopCount = 1;
+        bool jumpOut = false;
+
+        [HttpGet()]
+        public IActionResult catalogList()
+        {
+            var mylist = _context.CatalogRef.Select(c => new
+            {
+                id = c.Id,
+                pId = c.ParentId,
+                name = c.Cat
+            });
+            return Ok(mylist);
+        }
+
         [HttpPost("add")]
         public IActionResult addcat([FromBody] AddCatDto newCat)
         {
+
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             CatalogRef catalog = new CatalogRef();
@@ -33,6 +49,11 @@ namespace _374Cloud.Controllers
 
             catalog.ParentId = parent_id;
             catalog.Cat = cat;
+            var level = getLevel(parent_id, jumpOut);
+//          if(jumpOut)
+                catalog.LayerLevel = loopCount;
+            loopCount = 1;
+            jumpOut = false;
 
             _context.CatalogRef.Add(catalog);
             _context.SaveChanges();
@@ -45,10 +66,36 @@ namespace _374Cloud.Controllers
         {
             CatalogRef delcat = new CatalogRef();
             CodeRelations updateItem = new CodeRelations();
-            List<CodeRelations> codeRelationsList = new List<CodeRelations>();
+            List<CodeRelations> affectedItems = new List<CodeRelations>();
 
             delcat = _context.CatalogRef.Where(c => c.Id == id).FirstOrDefault();
-//            updateItem = _context.CodeRelations.Where(cl =>cl.Cat)
+            var affectedCatLevel = delcat.LayerLevel;
+
+            //update categories for affected items
+            if (affectedCatLevel == 1)
+            {
+                affectedItems = _context.CodeRelations.Where(cl => cl.Cat == delcat.Cat).ToList();
+                foreach (var item in affectedItems)
+                {
+                    item.Cat = "";
+                }
+            }
+            else if (affectedCatLevel == 2)
+            {
+                affectedItems = _context.CodeRelations.Where(cl => cl.SCat == delcat.Cat).ToList();
+                foreach (var item in affectedItems)
+                {
+                    item.SCat = "";
+                }
+            }
+            else if (affectedCatLevel == 3)
+            {
+                affectedItems = _context.CodeRelations.Where(cl => cl.SsCat == delcat.Cat).ToList();
+                foreach (var item in affectedItems)
+                {
+                    item.SsCat = "";
+                }
+            }
 
             if (delcat != null)
             {
@@ -79,10 +126,68 @@ namespace _374Cloud.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+  
+
+
+            ///update categories for affected items
+            List<CodeRelations> affectedItems = new List<CodeRelations>();
+            var affectedCatLevel = catToUpdate.LayerLevel;
+            //update categories for affected items
+            if (affectedCatLevel == 1)
+            {
+                affectedItems = _context.CodeRelations.Where(cl => cl.Cat == catToUpdate.Cat).ToList();
+                foreach (var item in affectedItems)
+                {
+                    item.Cat = catToPatch.cat;
+                }
+            }
+            else if (affectedCatLevel == 2)
+            {
+                affectedItems = _context.CodeRelations.Where(cl => cl.SCat == catToUpdate.Cat).ToList();
+                foreach (var item in affectedItems)
+                {
+                    item.SCat = catToPatch.cat;
+                }
+            }
+            else if (affectedCatLevel == 3)
+            {
+                affectedItems = _context.CodeRelations.Where(cl => cl.SsCat == catToUpdate.Cat).ToList();
+                foreach (var item in affectedItems)
+                {
+                    item.SsCat = catToPatch.cat;
+                }
+            }
+            ///
             catToUpdate.Cat = catToPatch.cat;
+
             _context.SaveChanges();
 
             return NoContent();
+        }
+
+        //Recursive get LayerLevel
+        private int getLevel(int pid, bool bGetLevel)
+        {
+            var upperLevelPid = _context.CatalogRef.Where(cr => cr.Id == pid).FirstOrDefault().ParentId;
+
+            if (pid == 0)
+            {
+                bGetLevel = true;
+                return loopCount;
+
+            }
+            else if (upperLevelPid == 0)
+            {
+                bGetLevel = true;
+                loopCount ++ ;
+                return loopCount;
+            }
+            else
+            {
+                loopCount ++;
+                getLevel(upperLevelPid, bGetLevel);
+            }
+            return loopCount;
         }
     }
 }
