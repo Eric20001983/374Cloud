@@ -16,7 +16,7 @@ namespace _374Cloud.Data
         {
         }
 
-        public virtual DbSet<CatalogRef> CatalogRef { get; set; }
+        public virtual DbSet<Catalog> Catalog { get; set; }
         public virtual DbSet<CodeRelations> CodeRelations { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -32,9 +32,9 @@ namespace _374Cloud.Data
         {
             modelBuilder.HasAnnotation("ProductVersion", "2.2.6-servicing-10079");
 
-            modelBuilder.Entity<CatalogRef>(entity =>
+            modelBuilder.Entity<Catalog>(entity =>
             {
-                entity.ToTable("catalog_ref");
+                entity.ToTable("catalog");
 
                 entity.Property(e => e.Id).HasColumnName("id");
 

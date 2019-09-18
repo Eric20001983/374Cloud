@@ -23,11 +23,12 @@ namespace _374Cloud.Controllers
         [HttpGet()]
         public IActionResult catalogList()
         {
-            var mylist = _context.CatalogRef.Select(c => new
+            var mylist = _context.Catalog.Select(c => new
             {
                 id = c.Id,
                 pId = c.ParentId,
-                name = c.Cat
+                name = c.Cat,
+                level = c.LayerLevel
             });
             return Ok(mylist);
         }
@@ -38,12 +39,12 @@ namespace _374Cloud.Controllers
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            CatalogRef catalog = new CatalogRef();
+            Catalog catalog = new Catalog();
 
 //          newCat.parent_id = 0; //root node
             var parent_id =  newCat.parent_id;
             var cat = newCat.cat;
-            bool existCat = _context.CatalogRef.Any(c => c.ParentId == parent_id && c.Cat == cat);
+            bool existCat = _context.Catalog.Any(c => c.ParentId == parent_id && c.Cat == cat);
             if (existCat)
                 return BadRequest("Sorry, this Category exists already!!!");
 
@@ -55,7 +56,7 @@ namespace _374Cloud.Controllers
             loopCount = 1;
             jumpOut = false;
 
-            _context.CatalogRef.Add(catalog);
+            _context.Catalog.Add(catalog);
             _context.SaveChanges();
 
             return Ok(catalog);
@@ -64,11 +65,11 @@ namespace _374Cloud.Controllers
         [HttpPost("del")]
         public IActionResult delcat([FromQuery] int id)
         {
-            CatalogRef delcat = new CatalogRef();
+            Catalog delcat = new Catalog();
             CodeRelations updateItem = new CodeRelations();
             List<CodeRelations> affectedItems = new List<CodeRelations>();
 
-            delcat = _context.CatalogRef.Where(c => c.Id == id).FirstOrDefault();
+            delcat = _context.Catalog.Where(c => c.Id == id).FirstOrDefault();
             var affectedCatLevel = delcat.LayerLevel;
 
             //update categories for affected items
@@ -111,7 +112,7 @@ namespace _374Cloud.Controllers
             if (patchDoc == null)
                 return BadRequest();
 
-            var catToUpdate = _context.CatalogRef.Where(c => c.Id == id).FirstOrDefault();
+            var catToUpdate = _context.Catalog.Where(c => c.Id == id).FirstOrDefault();
             if (catToUpdate == null)
                 return NotFound();
 
@@ -121,12 +122,19 @@ namespace _374Cloud.Controllers
                 parent_id = catToUpdate.ParentId,
                 cat = catToUpdate.Cat
             };
+
+
+
             patchDoc.ApplyTo(catToPatch, ModelState);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-  
+            bool existCat = _context.Catalog.Any(c => c.ParentId == catToPatch.parent_id && c.Cat == catToPatch.cat && c.Id != catToPatch.id);
+            if (existCat)
+                return BadRequest("Sorry, this Category exists already!!!");
+
+            catToUpdate.Cat = catToPatch.cat;
 
 
             ///update categories for affected items
@@ -158,7 +166,7 @@ namespace _374Cloud.Controllers
                 }
             }
             ///
-            catToUpdate.Cat = catToPatch.cat;
+
 
             _context.SaveChanges();
 
@@ -168,7 +176,13 @@ namespace _374Cloud.Controllers
         //Recursive get LayerLevel
         private int getLevel(int pid, bool bGetLevel)
         {
-            var upperLevelPid = _context.CatalogRef.Where(cr => cr.Id == pid).FirstOrDefault().ParentId;
+            var upperNode = _context.Catalog.Where(cr => cr.Id == pid).FirstOrDefault();
+
+            if (upperNode == null)
+                return loopCount;
+    
+             var upperLevelPid = _context.Catalog.Where(cr => cr.Id == pid).FirstOrDefault().ParentId;
+            
 
             if (pid == 0)
             {

@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace _374Cloud.Entities
 {
-    public partial class CatalogRef
+    public partial class Catalog
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
