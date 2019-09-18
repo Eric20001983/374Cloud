@@ -29,6 +29,8 @@
             searchUnitTree();
         });
         */
+        var prefix = "https://localhost:44399/api";
+ //       console.log(prefix);
         var setting = {
             view: {
                 addHoverDom: addHoverDom,
@@ -60,7 +62,7 @@
             cat = cat.trim();
             var parentid = 0;
 
-            var uri = "https://localhost:44399/api/cat/add";
+            var uri = prefix+"/cat/add";
             var someJsonString = {
                 "parent_id": parentid,
                 "cat": cat
@@ -166,7 +168,7 @@
                 };
                 $.ajax({
                     type: 'post',
-                    url: "https://localhost:44399/api/cat/add",
+                    url: prefix+"/cat/add",
                     data: JSON.stringify(data),
                     timeout: 1000, //超时时间设置，单位毫秒
                     contentType: "application/json",
@@ -244,7 +246,7 @@
             ];
             $.ajax({
                 type: 'Patch',
-                url: "https://localhost:44399/api/cat/edit?id=" + treeNode.id,
+                url: prefix + "/cat/edit?id=" + treeNode.id,
                 data: JSON.stringify(data),
                 timeout: 1000, //超时时间设置，单位毫秒
                 contentType: "application/json",
@@ -289,7 +291,7 @@
             if (oFlag) {
                 $.ajax({
                     type: 'post',
-                    url: "https://localhost:44399/api/cat/del?id=" + treeNode.id,
+                    url: prefix + "/api/cat/del?id=" + treeNode.id,
                     data: data,
                     timeout: 1000, //超时时间设置，单位毫秒
                     dataType: 'json',
@@ -399,7 +401,7 @@
             var level = treeNode.level;
             $.ajax({
                 type: "get",
-                url: "https://localhost:44399/api/item/" + id,
+                url: prefix + "/item/" + id,
                 async: true,
                 contentType: "application/json",
                 dataType: "json",
@@ -409,7 +411,7 @@
                 error: function (data) {
                     if (data.status == 401)
                         alert('Token Expired!! Redirect to login page!');
-                    setTimeout("window.location.href='login.html'", 1000);
+ //                   setTimeout("window.location.href='login.html'", 1000);
                 }
             });
 
@@ -421,7 +423,7 @@
         var zNodes;
         function searchUnitTree() {
             $.ajax({
-                url: 'https://localhost:44399/api/cat',
+                url: prefix + '/cat',
                 async: false,
                 dataType: 'json',
                 success: function (response) {
